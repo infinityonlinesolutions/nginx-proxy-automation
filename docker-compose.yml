@@ -3,27 +3,25 @@ version: '3.5'
 services:
   nginx-proxy-automation-web:
     image: nginxproxy/nginx-proxy:${NGINX_IMAGE_VERSION:-latest}
-    labels:
-      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+#    labels:
+#      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     container_name: ${NGINX_WEB_SEVICE_NAME:-nginx-proxy-automation-web}
     restart: always
     ports:
-       - "80:80"
-       - "443:443" 
-#      - "${IPv4:-0.0.0.0}:${DOCKER_HTTP_:-80}:80"
-#      - "${IPv4:-0.0.0.0}:${DOCKER_HTTPS:-443}:443"
-#      - "${IPv6:-::0}:${DOCKER_HTTP_:-80}:80"
-#      - "${IPv6:-::0}:${DOCKER_HTTPS:-443}:443"
+      - "${IPv4:-0.0.0.0}:${DOCKER_HTTP_:-80}:80"
+      - "${IPv4:-0.0.0.0}:${DOCKER_HTTPS:-443}:443"
+      - "${IPv6:-::0}:${DOCKER_HTTP_:-80}:80"
+      - "${IPv6:-::0}:${DOCKER_HTTPS:-443}:443"
     environment:
       SSL_POLICY: ${SSL_POLICY:-Mozilla-Intermediate}
-#      DEFAULT_HOST: ${DEFAULT_HOST}
-#      ENABLE_IPV6: "true"
+      DEFAULT_HOST: ${DEFAULT_HOST}
+      ENABLE_IPV6: "true"
     volumes:
       - ${NGINX_FILES_PATH:-./data}/conf.d:/etc/nginx/conf.d
       - ${NGINX_FILES_PATH:-./data}/vhost.d:/etc/nginx/vhost.d
       - ${NGINX_FILES_PATH:-./data}/html:/usr/share/nginx/html
       - ${NGINX_FILES_PATH:-./data}/certs:/etc/nginx/certs:ro
-      - ${NGINX_FILES_PATH:-./data}/htpasswd:/etc/nginx/htpasswd:ro
+#      - ${NGINX_FILES_PATH:-./data}/htpasswd:/etc/nginx/htpasswd:ro
       - ${DOCKER_HOST_ROOTLESS_PATH:-/var/run/docker.sock}:/tmp/docker.sock:ro
     network_mode: bridge  
     logging:
@@ -42,12 +40,14 @@ services:
       - ${NGINX_FILES_PATH:-./data}/vhost.d:/etc/nginx/vhost.d
       - ${NGINX_FILES_PATH:-./data}/html:/usr/share/nginx/html
       - ${NGINX_FILES_PATH:-./data}/certs:/etc/nginx/certs:ro
-      - ${NGINX_FILES_PATH:-./data}/htpasswd:/etc/nginx/htpasswd:ro
+ #     - ${NGINX_FILES_PATH:-./data}/htpasswd:/etc/nginx/htpasswd:ro
       - ${DOCKER_HOST_ROOTLESS_PATH:-/var/run/docker.sock}:/tmp/docker.sock:ro
       - ./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro
     labels:
       - "com.github.nginx-proxy.docker-gen"
-    network_mode: bridge      
+    network_mode: bridge
+    environment:
+      TRUST_DOWNSTREAM_PROXY: false    
     logging:
       driver: ${NGINX_GEN_LOG_DRIVER:-json-file}
       options:
